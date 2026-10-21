@@ -13,3 +13,11 @@ terraform/*_override.tf
 .env
 .env.*
 .DS_Store
+
+# CI working files
+terraform/plan.log
+terraform/plan.txt
+terraform/plan.json
+terraform/apply.log
+guard.log
+report.md

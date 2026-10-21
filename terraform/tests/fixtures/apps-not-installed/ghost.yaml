@@ -1,0 +1,6 @@
+owner_team: product
+purpose: Registered but never installed.
+approved_permissions: { metadata: read }
+review_by: "2027-01-01"
+status: active
+repositories: [service-a]

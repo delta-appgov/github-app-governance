@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-10-20T00:00:00Z",
+  "org": "test-org",
+  "installations": {
+    "t-bot": {
+      "installation_id": 101,
+      "app_id": 1001,
+      "repository_selection": "selected",
+      "suspended": false,
+      "permissions": {
+        "contents": "write",
+        "metadata": "read"
+      },
+      "created_at": "2026-01-01T00:00:00Z"
+    }
+  }
+}

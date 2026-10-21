@@ -1,0 +1,6 @@
+owner_team: product
+purpose: Being decommissioned.
+approved_permissions: { pull_requests: write, metadata: read }
+review_by: "2027-01-01"
+status: quarantined
+repositories: [service-c]

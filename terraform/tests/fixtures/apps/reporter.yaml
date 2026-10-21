@@ -1,0 +1,6 @@
+owner_team: product
+purpose: Medium-tier reporter.
+approved_permissions: { checks: write, metadata: read }
+review_by: "2027-03-01"
+status: active
+repositories: [service-a]

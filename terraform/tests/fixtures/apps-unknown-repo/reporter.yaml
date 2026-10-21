@@ -1,0 +1,6 @@
+owner_team: product
+purpose: Points at a repo that isn't managed.
+approved_permissions: { checks: write, metadata: read }
+review_by: "2027-01-01"
+status: active
+repositories: [service-a, github-app-governance]
