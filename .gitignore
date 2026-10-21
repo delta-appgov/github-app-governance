@@ -1,0 +1,15 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+tfplan*
+crash.log
+crash.*.log
+# local-only backend switch (copied from examples/ by reviewers without HCP)
+terraform/*_override.tf
+
+# Local env / OS
+.env
+.env.*
+.DS_Store
