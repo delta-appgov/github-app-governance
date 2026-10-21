@@ -4,7 +4,7 @@ purpose: Creates release tags and version-bump commits on the default branch.
 approved_permissions:
   contents: write
   metadata: read
-review_by: "2027-01-15"   # high tier (contents: write + bypass) → at most 90 days ahead
+review_by: "2027-10-01"   # a year out: violates the 90-day limit for high tier
 status: active
 repositories:
   - service-a
