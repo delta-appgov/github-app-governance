@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-10-20T00:00:00Z",
+  "org": "test-org",
+  "installations": {
+    "t-reporter": {
+      "installation_id": 102,
+      "app_id": 1002,
+      "repository_selection": "selected",
+      "suspended": false,
+      "permissions": {
+        "checks": "write",
+        "metadata": "read"
+      },
+      "created_at": "2026-01-01T00:00:00Z"
+    }
+  }
+}

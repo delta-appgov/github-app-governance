@@ -1,0 +1,142 @@
+# Daily governance audit: findings become GitHub issues (one per finding type, closed automatically once clean).
+#   inventory: live app installations vs inventory/inventory.json; the governance repo's own protections
+#   drift:     live GitHub state vs main; governance warnings (expiring reviews, unregistered apps, permission creep)
+name: audit
+
+on:
+  schedule:
+    - cron: "23 5 * * *" # daily, 05:23 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: audit
+  cancel-in-progress: false
+
+env:
+  TERRAFORM_VERSION: "1.16.6"
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "false"
+  TF_CLOUD_ORGANIZATION: ${{ vars.TF_CLOUD_ORGANIZATION }}
+  TF_WORKSPACE: ${{ vars.TF_WORKSPACE }}
+  TF_VAR_github_owner: ${{ vars.GH_OWNER || github.repository_owner }}
+  TF_VAR_app_slug_prefix: ${{ vars.APP_SLUG_PREFIX }}
+
+jobs:
+  inventory:
+    name: inventory
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: audit # main only; holds the read-only audit token
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Compare live installations with the committed inventory
+        env:
+          GH_TOKEN: ${{ secrets.GH_AUDIT_TOKEN }} # fine-grained, read-only: organization Administration: read
+          GH_OWNER: ${{ vars.GH_OWNER || github.repository_owner }}
+        run: |
+          if scripts/inventory.sh --check > inventory.diff; then
+            : > finding.md
+          else
+            {
+              echo "The org's live GitHub App installations no longer match \`inventory/inventory.json\`."
+              echo
+              echo "Possible causes: a new or reinstalled app, a vendor permission update that an owner accepted, a"
+              echo "suspension or an uninstall. Review the diff, then run \`scripts/inventory.sh\` and commit the"
+              echo "result in a PR (D-003). Unregistered apps: follow the claim process in docs/GOVERNANCE.md."
+              echo
+              echo '```diff'
+              cat inventory.diff
+              echo '```'
+            } > finding.md
+          fi
+
+      - name: Inventory issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          scripts/issue.sh "Audit: installed apps differ from the inventory" finding.md
+
+      - name: Governance repo protections (D-004)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          scripts/audit-governance-repo.sh > findings.txt
+          if [ -s findings.txt ]; then
+            { echo "The governance repo's own protections differ from the setup (docs/setup.md, D-004):"; echo; cat findings.txt; } > governance.md
+          else
+            : > governance.md
+          fi
+          scripts/issue.sh "Audit: governance repo protections changed" governance.md
+
+  drift:
+    name: drift
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # A scheduled run only executes main's reviewed code, so it may use the main-only credentials.
+    environment: production
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Plan (detailed exit code)
+        id: plan
+        env:
+          TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_APP_TERRAFORM_IO }}
+          GITHUB_TOKEN: ${{ secrets.GH_TF_TOKEN }}
+        run: |
+          set +e
+          scripts/tf-plan.sh -detailed-exitcode
+          code=$?
+          set -e
+          echo "exitcode=$code" >> "$GITHUB_OUTPUT"
+          if [ "$code" -eq 1 ]; then exit 1; fi
+
+      - name: Drift and governance-warning issues
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXITCODE: ${{ steps.plan.outputs.exitcode }}
+        run: |
+          if [ "$EXITCODE" = "2" ]; then
+            {
+              echo "Live GitHub state differs from \`main\`. Either something was changed outside a PR (for example,"
+              echo "a repo added to an app in the UI), or an app's review expired and it is due for quarantine (D-008)."
+              echo "The next apply will make GitHub match \`main\` again."
+              echo
+              scripts/plan-summary.sh terraform/plan.json
+            } > drift.md
+          else
+            : > drift.md
+          fi
+          scripts/issue.sh "Audit: drift between GitHub and main" drift.md
+
+          jq -r '.checks[]? | select(.status == "fail") | .instances[]?.problems[]?.message | "- " + gsub("\n"; " ")' terraform/plan.json > warnings.txt
+          if [ -s warnings.txt ]; then
+            { echo "Today's plan raised these governance warnings. They never block merges; each needs an owner's action:"; echo; cat warnings.txt; } > warnings.md
+          else
+            : > warnings.md
+          fi
+          scripts/issue.sh "Audit: governance warnings" warnings.md
+
+      # Optional, enabled with the repository variable AUTO_RECONCILE=true. Applies only changes that REMOVE access
+      # (expired reviews, repos added by hand in the UI). Never re-grants: that could undo an incident response.
+      - name: Reconcile (narrowing only)
+        if: steps.plan.outputs.exitcode == '2' && vars.AUTO_RECONCILE == 'true'
+        env:
+          TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_APP_TERRAFORM_IO }}
+          GITHUB_TOKEN: ${{ secrets.GH_TF_TOKEN }}
+        run: |
+          scripts/plan-guard.sh terraform/plan.json --narrowing-only
+          cd terraform && terraform apply -no-color tfplan

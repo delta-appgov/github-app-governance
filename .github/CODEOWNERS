@@ -1,0 +1,19 @@
+# Who must review what. Informational in this single-maintainer demo: required approvals are 0 (D-009).
+# In a real org, turn on "Require review from Code Owners" in the governance ruleset.
+# Ownership of each app lives in its YAML (owner_team); keep this file in sync when adding apps.
+
+*                         @delta-appgov/platform
+
+# Registry: the owning team plus security for every app
+/apps/                    @delta-appgov/security
+/apps/release-bot.yaml    @delta-appgov/platform @delta-appgov/security
+/apps/ci-reporter.yaml    @delta-appgov/product @delta-appgov/security
+/apps/legacy-linter.yaml  @delta-appgov/product @delta-appgov/security
+/inventory/               @delta-appgov/security
+
+# The machinery: anything that runs with credentials or changes what is enforced
+/.github/                 @delta-appgov/platform @delta-appgov/security
+/terraform/               @delta-appgov/platform @delta-appgov/security
+/scripts/                 @delta-appgov/platform @delta-appgov/security
+/repositories.yaml        @delta-appgov/platform
+/.github/CODEOWNERS       @delta-appgov/security

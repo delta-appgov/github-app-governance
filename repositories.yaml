@@ -1,0 +1,11 @@
+# Workload repositories managed by terraform/ (settings + rulesets). Apps may only be granted repos listed here.
+# Deliberately absent: github-app-governance (D-004) and app-quarantine (D-013).
+service-a:
+  description: "Demo workload: payments API"
+  topics: [demo-workload]
+service-b:
+  description: "Demo workload: web frontend"
+  topics: [demo-workload]
+service-c:
+  description: "Demo workload: data pipeline"
+  topics: [demo-workload]

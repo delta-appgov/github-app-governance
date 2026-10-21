@@ -1,0 +1,11 @@
+{
+  "generated_at": "2026-10-20T00:00:00Z",
+  "org": "test-org",
+  "installations": {
+    "t-bot":      { "installation_id": 101, "app_id": 1001, "repository_selection": "selected", "suspended": false, "permissions": { "contents": "write", "metadata": "read" }, "created_at": "2026-01-01T00:00:00Z" },
+    "t-reporter": { "installation_id": 102, "app_id": 1002, "repository_selection": "selected", "suspended": false, "permissions": { "checks": "write", "metadata": "read" }, "created_at": "2026-01-01T00:00:00Z" },
+    "t-old":      { "installation_id": 103, "app_id": 1003, "repository_selection": "selected", "suspended": false, "permissions": { "pull_requests": "write", "metadata": "read" }, "created_at": "2026-01-01T00:00:00Z" },
+    "t-crit":     { "installation_id": 104, "app_id": 1004, "repository_selection": "selected", "suspended": false, "permissions": { "issues": "read", "metadata": "read" }, "created_at": "2026-01-01T00:00:00Z" },
+    "t-stray":    { "installation_id": 105, "app_id": 1005, "repository_selection": "all", "suspended": false, "permissions": { "issues": "read", "metadata": "read" }, "created_at": "2026-01-01T00:00:00Z" }
+  }
+}

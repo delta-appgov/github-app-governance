@@ -1,0 +1,8 @@
+owner_team: platform
+escalation: security
+purpose: Low-tier but business-critical.
+criticality: business-critical
+approved_permissions: { issues: read, metadata: read }
+review_by: "2026-11-01"
+status: active
+repositories: [service-c]

@@ -1,0 +1,7 @@
+owner_team: platform
+purpose: High-tier bot with a bypass.
+approved_permissions: { contents: write, metadata: read }
+review_by: "2026-12-01"
+status: active
+repositories: [service-a, service-b]
+bypass: [require-pr]

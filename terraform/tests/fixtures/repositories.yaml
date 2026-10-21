@@ -1,0 +1,3 @@
+service-a: { description: "a" }
+service-b: { description: "b" }
+service-c: { description: "c" }

@@ -118,6 +118,10 @@ with any cloud provider**. Every AWS, GCP and Azure account requires one.
   - In remote mode the GitHub token would sit in workspace variables, where plan-time code on HCP's workers can read it.
   - Remote runs upload only the current directory unless a working directory is configured. `../apps` would
     silently disappear, and the plan would try to remove every app's access.
+- **Rejected alternative: VCS-driven workspace.** In this mode HCP Terraform watches the repo and runs plan/apply
+  itself, connected through HashiCorp's own GitHub App ("GitHub App OAuth token" in HCP user settings). It fails the
+  assignment's "GitHub workflow runs plan/apply" criterion. It would also mean installing one more third-party
+  GitHub App with access to our repos, which is the very thing this project governs.
 - **Cost:** Logs live in Actions, not HCP's run UI. The credentials live in GitHub secrets.
 - **Revisit when:** a paid tier with agents and team-scoped tokens is available.
 
@@ -128,7 +132,8 @@ with any cloud provider**. Every AWS, GCP and Azure account requires one.
   holds the installation ID, app ID, permissions and repository selection. Terraform reads the file, not the API.
 - **Why:**
   - Plans are deterministic and reviewable.
-  - The plan job doesn't need org-owner rights to list installations.
+  - The plan job doesn't need rights to list installations. (The spike showed the maintainer's classic token *can*
+    list them, so this only matters once the pipeline identity is a non-owner, per D-005's enterprise target.)
   - A newly installed app shows up as a diff in a PR.
   - The same file feeds the daily audit and the brownfield scaffolding.
   - The live alternatives pull reality into desired state at plan time. The `github_rest_api` data source reads only
@@ -274,9 +279,19 @@ with any cloud provider**. Every AWS, GCP and Azure account requires one.
 - **Why:** It mirrors an enterprise, where teams come from the identity provider. It also keeps the pipeline token at
   `read:org` instead of `admin:org`.
 
-## D-013 — `app-quarantine` is created during setup, then imported
+## D-013 — `app-quarantine` is created and archived during setup; Terraform only reads it
 
-- **Status:** Accepted — 2026-10-21
-- **Decision:** The quarantine repo is created by hand during setup, then adopted into Terraform with an `import` block.
-- **Why:** An app must be installed on some repo before Terraform can manage it, so this repo has to exist first. It
-  also demonstrates the import pattern for adopting Delta's existing repos.
+- **Status:** Accepted — 2026-10-21. Revised after the spike; the first version imported the repo into Terraform.
+- **Decision:**
+  - The quarantine repo is created by hand during setup and then **archived**.
+  - Terraform reads it with a data source.
+  - A `check` warns if it's ever unarchived.
+- **Why:**
+  - Apps must be installed on some repo before Terraform can manage them, so this repo has to exist first.
+  - The spike showed an archived repo can still be added to and removed from installations. Archiving makes
+    quarantine real containment for repository permissions: an app parked there can read an empty repo, and
+    can't write anything.
+  - An archived repo is read-only, so any Terraform update to it fails with a 403. The spike hit exactly that
+    error with provider 6.13.0. That rules out managing it.
+- **Cost:** No live `import` demonstration. The import pattern is documented in GOVERNANCE.md for adopting existing
+  repos and apps. Org-level permissions are still not contained by quarantine (suspend those apps; see GOVERNANCE.md).
