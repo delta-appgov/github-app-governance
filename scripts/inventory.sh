@@ -14,7 +14,9 @@ mode="${1:-write}"
 
 # updated_at is left out on purpose: it changes whenever repositories are added or removed, and the repository
 # set is Terraform's job, not the inventory's.
-live="$(gh api --paginate "orgs/$org/installations?per_page=100" --jq '.installations[]' | jq -S -s '
+# Time-Zone: timestamps otherwise come back in the token owner's zone for classic PATs and in UTC for
+# fine-grained ones, which would make the same installation look different depending on who ran the script.
+live="$(gh api --paginate -H "Time-Zone: Etc/UTC" "orgs/$org/installations?per_page=100" --jq '.installations[]' | jq -S -s '
   map({key: .app_slug, value: {
     installation_id: .id,
     app_id,

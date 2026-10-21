@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-21T16:20:39Z",
+  "generated_at": "2026-10-21T17:32:28Z",
   "installations": {
     "delta-appgov-ci-reporter": {
       "app_id": 5412986,
-      "created_at": "2026-10-21T17:31:16.000+02:00",
+      "created_at": "2026-10-21T15:31:16.000Z",
       "installation_id": 173805478,
       "permissions": {
         "checks": "write",
@@ -13,20 +13,9 @@
       "repository_selection": "selected",
       "suspended": false
     },
-    "delta-appgov-legacy-linter": {
-      "app_id": 5412994,
-      "created_at": "2026-10-21T17:32:19.000+02:00",
-      "installation_id": 173805836,
-      "permissions": {
-        "metadata": "read",
-        "pull_requests": "write"
-      },
-      "repository_selection": "selected",
-      "suspended": false
-    },
     "delta-appgov-release-bot": {
       "app_id": 5412954,
-      "created_at": "2026-10-21T17:29:51.000+02:00",
+      "created_at": "2026-10-21T15:29:51.000Z",
       "installation_id": 173805017,
       "permissions": {
         "contents": "write",
@@ -37,7 +26,7 @@
     },
     "delta-appgov-stray-bot": {
       "app_id": 5412999,
-      "created_at": "2026-10-21T17:33:03.000+02:00",
+      "created_at": "2026-10-21T15:33:03.000Z",
       "installation_id": 173806079,
       "permissions": {
         "issues": "read",
