@@ -5,7 +5,7 @@ approved_permissions:
   pull_requests: write
   metadata: read
 review_by: "2027-03-01"   # medium tier → at most 180 days ahead
-status: active
+status: quarantined     # decommission step 1 (D-006): real access removed, installation kept
 repositories:
   - service-a
   - service-c
