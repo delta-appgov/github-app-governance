@@ -1,0 +1,12 @@
+# Pinned actions (by SHA) and the exact provider pin get update PRs; an upgrade must produce a no-op plan.
+# Dependabot-triggered runs get no Actions secrets: push any commit to the branch as a maintainer to plan it.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: terraform
+    directory: /terraform
+    schedule:
+      interval: weekly
