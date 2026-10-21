@@ -77,13 +77,15 @@ high-tier apps.
 
 Only two repos are created manually. Terraform creates the workload repos (`service-a`, `service-b`, `service-c`) later.
 
-**a) The quarantine/parking repo (D-013).** Apps need a repo to land on before Terraform manages them. Terraform
-adopts this repo later with an `import` block.
+**a) The quarantine/parking repo (D-013).** Apps need a repo to land on before Terraform manages them. The repo is
+**archived**, so it's read-only: an app parked there can't write anything. It can still be added to and removed
+from installations. Terraform only reads this repo and warns if it's ever unarchived.
 
 ```bash
 gh repo create "$ORG/app-quarantine" --public --add-readme \
   --description "Parking repo for GitHub App installations. Contains no code. Managed by github-app-governance."
 gh repo edit "$ORG/app-quarantine" --enable-issues=false --enable-wiki=false --enable-projects=false
+gh repo archive "$ORG/app-quarantine" --yes
 ```
 
 **b) The governance repo (this one).** From the local folder:
@@ -98,6 +100,14 @@ gh repo create "$ORG/github-app-governance" --public --source . --remote origin 
 
 Then, in the governance repo's **Settings → General → Pull Requests**: allow **squash merging** only, and tick
 **Automatically delete head branches**.
+
+Give the owner teams write access, which CODEOWNERS requires before it accepts a team:
+
+```bash
+for t in platform security product; do
+  gh api -X PUT "orgs/$ORG/teams/$t/repos/$ORG/github-app-governance" -f permission=push
+done
+```
 
 ## 5. Dummy GitHub Apps (owned by the org)
 
@@ -170,12 +180,13 @@ gh secret set GH_AUDIT_TOKEN            --env audit      --repo "$R"
 
 gh variable set TF_CLOUD_ORGANIZATION --body "$HCP_ORG"   --repo "$R"
 gh variable set TF_WORKSPACE          --body "$WORKSPACE" --repo "$R"
-gh variable set GITHUB_OWNER          --body "$ORG"       --repo "$R"
+gh variable set GH_OWNER              --body "$ORG"       --repo "$R"   # optional: defaults to the repo's owner
 gh variable set APP_SLUG_PREFIX       --body "$PREFIX"    --repo "$R"
 ```
 
-(The secret names avoid the `GITHUB_` prefix because GitHub reserves it. The workflow maps `GH_TF_TOKEN` to the
-`GITHUB_TOKEN` env var the provider reads.)
+(Secret and variable names can't start with `GITHUB_`, because GitHub reserves that prefix. So the workflow maps
+`GH_TF_TOKEN` to the provider's `GITHUB_TOKEN` env var, and `GH_OWNER` to the org Terraform manages. If `GH_OWNER`
+isn't set, it falls back to the org that owns this repo.)
 
 ## 9. Governance repo ruleset — LATER, once the workflows are merged
 
