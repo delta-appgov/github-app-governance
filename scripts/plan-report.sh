@@ -16,9 +16,21 @@ else
   echo "Registry mistakes fail a precondition with an explanation, e.g. a review date too far out, an unknown"
   echo "repository, or an app missing from the inventory."
   echo
-  echo '```'
-  if [ -f "$tf/plan.log" ]; then tail -c 20000 "$tf/plan.log"; else echo "(no plan output)"; fi
-  echo '```'
+  if [ -f "$tf/plan.log" ]; then
+    # The explanation first (from the first "Error:" on), the full log folded underneath.
+    echo '```'
+    sed -n '/^Error: /,$p' "$tf/plan.log" | head -c 15000
+    echo '```'
+    echo
+    echo "<details><summary>Full plan log</summary>"
+    echo
+    echo '```'
+    tail -c 20000 "$tf/plan.log"
+    echo '```'
+    echo "</details>"
+  else
+    echo "(no plan output)"
+  fi
 fi
 
 if [ -n "$guard" ] && [ -f "$guard" ] && grep -q '^::error' "$guard"; then
