@@ -17,6 +17,12 @@ export WORKSPACE=github-app-governance
 > The org is a throwaway sandbox for a take-home assignment. Give it a description that says so (step 1), so
 > nobody mistakes it for an official organization.
 
+> **Shortcut:** `scripts/bootstrap.sh` automates the command-line parts. That's steps 3 and 4a (including
+> archiving), the repo settings in 4b, and step 8 (`--with-secrets` prompts for the values). It also covers step 9
+> (`--with-ruleset`) and the HCP workspace from step 6 (`--with-hcp`). It's idempotent, so it's safe to re-run.
+> Still manual: creating the org (1), the baseline settings (2), the apps (5), signing up for HCP and its tokens
+> (6) and the GitHub tokens (7).
+
 ---
 
 ## 0. Before you start (laptop)
