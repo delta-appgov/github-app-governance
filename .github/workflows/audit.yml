@@ -96,20 +96,19 @@ jobs:
         env:
           TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_APP_TERRAFORM_IO }}
           GITHUB_TOKEN: ${{ secrets.GH_TF_TOKEN }}
+        # Drift = a planned change to a real resource. -detailed-exitcode alone also reports output-only
+        # differences, which aren't drift.
         run: |
-          set +e
-          scripts/tf-plan.sh -detailed-exitcode
-          code=$?
-          set -e
-          echo "exitcode=$code" >> "$GITHUB_OUTPUT"
-          if [ "$code" -eq 1 ]; then exit 1; fi
+          scripts/tf-plan.sh
+          changes="$(jq '[.resource_changes[]? | select(.change.actions != ["no-op"] and .change.actions != ["read"])] | length' terraform/plan.json)"
+          echo "drift=$([ "$changes" -gt 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
       - name: Drift and governance-warning issues
         env:
           GH_TOKEN: ${{ github.token }}
-          EXITCODE: ${{ steps.plan.outputs.exitcode }}
+          DRIFT: ${{ steps.plan.outputs.drift }}
         run: |
-          if [ "$EXITCODE" = "2" ]; then
+          if [ "$DRIFT" = "true" ]; then
             {
               echo "Live GitHub state differs from \`main\`. Either something was changed outside a PR (for example,"
               echo "a repo added to an app in the UI), or an app's review expired and it is due for quarantine (D-008)."
@@ -133,7 +132,7 @@ jobs:
       # Optional, enabled with the repository variable AUTO_RECONCILE=true. Applies only changes that REMOVE access
       # (expired reviews, repos added by hand in the UI). Never re-grants: that could undo an incident response.
       - name: Reconcile (narrowing only)
-        if: steps.plan.outputs.exitcode == '2' && vars.AUTO_RECONCILE == 'true'
+        if: steps.plan.outputs.drift == 'true' && vars.AUTO_RECONCILE == 'true'
         env:
           TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_APP_TERRAFORM_IO }}
           GITHUB_TOKEN: ${{ secrets.GH_TF_TOKEN }}

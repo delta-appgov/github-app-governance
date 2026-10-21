@@ -126,8 +126,12 @@ jobs:
       group: terraform-apply
       cancel-in-progress: false
     steps:
+      # Reconcile the LATEST main, not the commit that triggered this run. GitHub can deliver push events late. On
+      # 2026-10-21 a delayed run for an older commit re-applied stale state; see NOTES.md. Applies are serialized,
+      # so each one makes GitHub match main as it is now.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: main
           persist-credentials: false
 
       - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
@@ -165,16 +169,21 @@ jobs:
           OUTCOME: ${{ steps.apply.outcome }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
+          applied="$(git rev-parse --short HEAD)"
           {
             case "$OUTCOME" in
-              success) echo "## ✅ Applied to \`$TF_VAR_github_owner\`" ;;
+              success) echo "## ✅ Applied \`main\` @ $applied to \`$TF_VAR_github_owner\`" ;;
               skipped) echo "## ⏸️ Not applied (plan or guard failed)" ;;
               *)       echo "## ❌ Apply failed"; echo; echo '```'; tail -c 15000 terraform/apply.log 2>/dev/null; echo '```' ;;
             esac
+            if [ "$applied" != "${GITHUB_SHA:0:7}" ]; then
+              echo
+              echo "Triggered by ${GITHUB_SHA:0:7}, but \`main\` had moved on to $applied, so the latest desired state was applied."
+            fi
             echo
             scripts/plan-report.sh guard.log
             echo
-            echo "<sub>${GITHUB_SHA:0:7} · [workflow run]($RUN_URL)</sub>"
+            echo "<sub>main @ $applied · [workflow run]($RUN_URL)</sub>"
           } > report.md
           cat report.md >> "$GITHUB_STEP_SUMMARY"
           pr="$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls" --jq '.[0].number // empty')"
