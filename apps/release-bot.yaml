@@ -9,6 +9,7 @@ status: active
 repositories:
   - service-a
   - service-b
+  - service-c
 bypass:
   - require-pr            # pushes version bumps without a PR; branch-integrity still applies
 ticket: SEC-101
