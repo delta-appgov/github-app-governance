@@ -295,3 +295,20 @@ with any cloud provider**. Every AWS, GCP and Azure account requires one.
     error with provider 6.13.0. That rules out managing it.
 - **Cost:** No live `import` demonstration. The import pattern is documented in GOVERNANCE.md for adopting existing
   repos and apps. Org-level permissions are still not contained by quarantine (suspend those apps; see GOVERNANCE.md).
+
+## D-014 — Every apply reconciles the latest `main`; drift means a resource change
+
+- **Status:** Accepted — 2026-10-21. Added after an incident; see #9.
+- **Context:** During a GitHub incident ("Delays for Pull Requests and Webhook deliveries"), the push event for #6
+  arrived **after** #7 had been applied. The delayed run checked out its own, older commit and re-applied stale
+  desired state, giving the already-quarantined legacy-linter two repositories back. The app was suspended, so the
+  grant was never usable, and the delete guard then blocked #8.
+- **Decision:**
+  - The apply job checks out `main`, not the triggering commit. Every apply makes GitHub match **current** `main`,
+    so late, replayed or missed runs are harmless: the next one converges. Applies are serialized.
+  - The drift audit counts planned **resource** changes in the plan JSON. Output-only differences aren't drift.
+- **Why:** Push-triggered GitOps is edge-triggered, so events can be late, duplicated or lost. Correctness has to
+  come from level-based reconciliation (desired state = `main`, applied in full), not from processing each event
+  exactly once.
+- **Cost:** An apply comment on a merged PR can include changes from later PRs. The report names the applied
+  commit and says when it differs from the trigger.

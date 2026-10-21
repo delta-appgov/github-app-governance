@@ -122,7 +122,7 @@ locals {
 
   # --- Rules that apps depend on ----------------------------------------------------------------------------------
   # Bypass is granted per repository, and only where the app is installed: GitHub rejects an Integration bypass
-  # for an app that isn't installed on the repository (422, spike S4).
+  # for an app that isn't installed on the repository (422, verified against the live API).
 
   bypass_by_repo = {
     for repo in keys(local.repositories) : repo => sort(distinct([

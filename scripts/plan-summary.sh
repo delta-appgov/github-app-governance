@@ -9,10 +9,11 @@ plan="${1:?usage: plan-summary.sh plan.json [plan.txt]}"
 text="${2:-}"
 inventory="$(cd "$(dirname "$0")/.." && pwd)/inventory/inventory.json"
 
-jq -r --slurpfile inv "$inventory" '
+jq -r --slurpfile inv "$inventory" --arg q "${QUARANTINE_REPO:-app-quarantine}" '
   # App IDs → app slugs, via the committed inventory.
   def names($ids): [$ids[] as $id | (($inv[0].installations | to_entries[] | select(.value.app_id == $id) | .key) // ($id | tostring))];
   def joined: if length == 0 then "—" else join(", ") end;
+  def has($r): any(.[]; . == $r);
 
   [.resource_changes[]? | select(.change.actions != ["no-op"] and .change.actions != ["read"])] as $changes
   | ($changes | map(.change.actions | join("+")) | group_by(.) | map("\(length) to \(.[0])") | join(", ")) as $counts
@@ -27,7 +28,9 @@ jq -r --slurpfile inv "$inventory" '
           ( $apps[]
             | (.change.before.selected_repositories // []) as $b
             | (if .change.actions == ["delete"] then [] else (.change.after.selected_repositories // []) end) as $a
-            | "| `\(.index)` | \($b | joined) | \(if .change.actions == ["delete"] then "*removed from Terraform*" else ($a | joined) end) | \(((($a - $b) | map("**+" + . + "**")) + (($b - $a) | map("−" + .))) | joined) |" ),
+            | "| `\(.index)` | \(if .change.actions == ["create"] then "*not managed yet*" else ($b | joined) end) | \(if .change.actions == ["delete"] then "*removed from Terraform*" else ($a | joined) end) | \(if .change.actions == ["delete"] then "no longer tracked; GitHub keeps it on \($b | joined) until it is uninstalled" else (($a - $b - [$q]) | map("**+" + . + "**")) + (($b - $a - [$q]) | map("−" + .))
+                  + (if ($a | has($q)) and (($b | has($q)) | not) then ["⏸ parked on \($q) (no real access)"] else [] end)
+                  + (if ($b | has($q)) and (($a | has($q)) | not) then ["▶ leaves \($q)"] else [] end) | joined end) |" ),
           ""
         else empty end ),
 

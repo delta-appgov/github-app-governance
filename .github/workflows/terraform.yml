@@ -127,7 +127,7 @@ jobs:
       cancel-in-progress: false
     steps:
       # Reconcile the LATEST main, not the commit that triggered this run. GitHub can deliver push events late. On
-      # 2026-10-21 a delayed run for an older commit re-applied stale state; see NOTES.md. Applies are serialized,
+      # 2026-10-21 a delayed run for an older commit re-applied stale state; see PR #9 and D-014. Applies are serialized,
       # so each one makes GitHub match main as it is now.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

@@ -17,6 +17,12 @@ export WORKSPACE=github-app-governance
 > The org is a throwaway sandbox for a take-home assignment. Give it a description that says so (step 1), so
 > nobody mistakes it for an official organization.
 
+> **Shortcut:** `scripts/bootstrap.sh` automates the command-line parts. That's steps 3 and 4a (including
+> archiving), the repo settings in 4b, and step 8 (`--with-secrets` prompts for the values). It also covers step 9
+> (`--with-ruleset`) and the HCP workspace from step 6 (`--with-hcp`). It's idempotent, so it's safe to re-run.
+> Still manual: creating the org (1), the baseline settings (2), the apps (5), signing up for HCP and its tokens
+> (6) and the GitHub tokens (7).
+
 ---
 
 ## 0. Before you start (laptop)
@@ -35,7 +41,6 @@ export WORKSPACE=github-app-governance
   gh auth status
   ```
 - [ ] `jq` installed (`brew install jq`).
-- [ ] Start the **time log** in `NOTES.md`. Setup counts toward the 8 hours.
 
 ---
 
@@ -93,7 +98,7 @@ gh repo archive "$ORG/app-quarantine" --yes
 ```bash
 cd github-app-governance
 git init -b main
-git add . && git commit -m "docs: decision log, setup guide, notes skeleton"
+git add . && git commit -m "docs: decision log and setup guide"
 gh repo create "$ORG/github-app-governance" --public --source . --remote origin --push \
   --description "GitOps-managed governance of GitHub App access"
 ```
@@ -148,7 +153,7 @@ gh api "orgs/$ORG/installations" --jq '.installations[] | [.app_slug, .id, .repo
 
 ## 7. GitHub tokens (D-005, an accepted trade-off)
 
-All three tokens are created on **your** account with a **30-day expiry**. Write the expiry dates in `NOTES.md`.
+All three tokens are created on **your** account with a **30-day expiry**. Put the expiry dates in your calendar (see §11).
 
 | Token | Where | Settings |
 |---|---|---|

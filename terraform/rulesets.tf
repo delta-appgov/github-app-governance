@@ -56,7 +56,7 @@ resource "github_repository_ruleset" "require_pr" {
     }
   }
 
-  # GitHub rejects an Integration bypass for an app that isn't installed on the repo (spike S4). Access must change
-  # first. That ordering also works when access is revoked (spike S2).
+  # GitHub rejects an Integration bypass for an app that isn't installed on the repo (422, verified live). Access must change
+  # first. That ordering also works when access is revoked (also verified).
   depends_on = [github_app_installation_repositories.this]
 }
