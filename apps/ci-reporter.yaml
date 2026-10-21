@@ -9,6 +9,4 @@ review_by: "2027-04-01"   # medium tier → at most 180 days ahead
 status: active
 repositories:
   - service-a
-  - service-b
-  - service-c
 ticket: SEC-102
