@@ -12,6 +12,15 @@ Built for a DevOps take-home: a throwaway org, [`delta-appgov`](https://github.c
 problem of too many apps, no ownership and no process. The scale is handled in the design write-up
 ([docs/GOVERNANCE.md](docs/GOVERNANCE.md)), not by creating hundreds of resources.
 
+> **Start here (5 minutes)**
+>
+> 1. **[Demo trail](#demo-trail):** every change as a real PR, in story order: add, narrow, two deliberately failing
+>    PRs, and a safe decommission.
+> 2. **[PR #2's plan comment](https://github.com/delta-appgov/github-app-governance/pull/2#issuecomment-6321777609):**
+>    what a reviewer sees before approving: the per-app access diff, the rule bypass, governance warnings.
+> 3. **[docs/GOVERNANCE.md](docs/GOVERNANCE.md):** ownership, review and expiry, detecting apps nobody remembers
+>    installing, and safe decommissioning.
+
 ## How it works
 
 ```
