@@ -8,6 +8,7 @@
 /apps/                    @delta-appgov/security
 /apps/release-bot.yaml    @delta-appgov/platform @delta-appgov/security
 /apps/ci-reporter.yaml    @delta-appgov/product @delta-appgov/security
+/apps/docs-bot.yaml  @delta-appgov/product @delta-appgov/security
 /apps/legacy-linter.yaml  @delta-appgov/product @delta-appgov/security
 /inventory/               @delta-appgov/security
 

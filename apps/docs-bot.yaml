@@ -1,0 +1,12 @@
+owner_team: product
+escalation: platform
+purpose: Read-only access to documents
+approved_permissions:
+  contents: read
+  metadata: read
+review_by: "2027-04-15"
+status: active
+repositories:
+  - service-a
+  - service-b
+ticket: PROD-100

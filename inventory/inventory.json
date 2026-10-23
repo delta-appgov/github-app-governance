@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-21T17:32:28Z",
+  "generated_at": "2026-10-23T14:45:15Z",
   "installations": {
     "delta-appgov-ci-reporter": {
       "app_id": 5412986,
@@ -7,6 +7,17 @@
       "installation_id": 173805478,
       "permissions": {
         "checks": "write",
+        "contents": "read",
+        "metadata": "read"
+      },
+      "repository_selection": "selected",
+      "suspended": false
+    },
+    "delta-appgov-docs-bot": {
+      "app_id": 5443200,
+      "created_at": "2026-10-23T14:40:51.000Z",
+      "installation_id": 174514967,
+      "permissions": {
         "contents": "read",
         "metadata": "read"
       },
